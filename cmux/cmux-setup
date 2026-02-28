@@ -1,0 +1,45 @@
+#!/bin/zsh
+# cmux起動時のレイアウト自動セットアップ
+# 使い方: cmux-setup [プロジェクトパス]
+
+CMUX=/Applications/cmux.app/Contents/Resources/bin/cmux
+PROJECT_DIR="${1:-$PWD}"
+
+# cmuxが起動しているか確認
+if ! $CMUX ping > /dev/null 2>&1; then
+    echo "cmuxが起動していません。cmuxを先に起動してください。"
+    exit 1
+fi
+
+# 現在のサーフェスを取得
+CURRENT=$($CMUX identify 2>/dev/null)
+if [ -z "$CURRENT" ]; then
+    echo "cmuxのターミナル内から実行してください。"
+    exit 1
+fi
+
+echo "レイアウトをセットアップ中..."
+
+# 左にyaziペイン（new-splitの出力からサーフェスIDを直接取得）
+LEFT_RESULT=$($CMUX new-split left 2>&1)
+LEFT_SURFACE=$(echo "$LEFT_RESULT" | awk '{print $2}')
+sleep 0.3
+if [ -n "$LEFT_SURFACE" ]; then
+    $CMUX send --surface "$LEFT_SURFACE" "cd ${PROJECT_DIR} && y\n"
+    echo "✅ 左: yazi（ファイルブラウザ） [$LEFT_SURFACE]"
+else
+    echo "⚠️  左ペインの作成に失敗しました: $LEFT_RESULT"
+fi
+
+# 下にlazygitペイン
+BOTTOM_RESULT=$($CMUX new-split down 2>&1)
+BOTTOM_SURFACE=$(echo "$BOTTOM_RESULT" | awk '{print $2}')
+sleep 0.3
+if [ -n "$BOTTOM_SURFACE" ]; then
+    $CMUX send --surface "$BOTTOM_SURFACE" "cd ${PROJECT_DIR} && lazygit\n"
+    echo "✅ 下: lazygit（差分・git管理） [$BOTTOM_SURFACE]"
+else
+    echo "⚠️  下ペインの作成に失敗しました: $BOTTOM_RESULT"
+fi
+
+echo "✅ 右: ターミナル（作業用）"

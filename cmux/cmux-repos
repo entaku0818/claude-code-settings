@@ -1,0 +1,27 @@
+#!/bin/zsh
+# repository配下を全てcmuxのワークスペースで開く
+
+CMUX=/Applications/cmux.app/Contents/Resources/bin/cmux
+BASE=/Users/entaku/repository
+
+# cmuxが起動しているか確認
+if ! $CMUX ping > /dev/null 2>&1; then
+    echo "cmuxが起動していません。cmuxを先に起動してください。"
+    exit 1
+fi
+
+echo "repository配下のディレクトリをワークスペースとして開いています..."
+
+for dir in "$BASE"/*/; do
+    name=$(basename "$dir")
+    WS=$($CMUX new-workspace 2>&1 | awk '{print $2}')
+    sleep 0.2
+    if [ -n "$WS" ]; then
+        $CMUX send --workspace "$WS" "cd ${dir}\n"
+        echo "✅ $name [$WS]"
+    else
+        echo "⚠️  $name のワークスペース作成に失敗しました"
+    fi
+done
+
+echo "完了！"
