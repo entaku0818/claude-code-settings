@@ -17,7 +17,7 @@ for dir in "$BASE"/*/; do
     WS=$($CMUX new-workspace 2>&1 | awk '{print $2}')
     sleep 0.2
     if [ -n "$WS" ]; then
-        $CMUX send --workspace "$WS" "cd ${dir}\n"
+        $CMUX send --workspace "$WS" "cd ${dir} && printf '\\033]0;%s\\007' '${name}'\n"
         sleep 0.5
         $CMUX send --workspace "$WS" "cmux-setup ${dir}\n"
         echo "✅ $name [$WS]"
