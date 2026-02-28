@@ -18,6 +18,8 @@ for dir in "$BASE"/*/; do
     sleep 0.2
     if [ -n "$WS" ]; then
         $CMUX send --workspace "$WS" "cd ${dir}\n"
+        sleep 0.5
+        $CMUX send --workspace "$WS" "cmux-setup ${dir}\n"
         echo "✅ $name [$WS]"
     else
         echo "⚠️  $name のワークスペース作成に失敗しました"
