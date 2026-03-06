@@ -145,8 +145,8 @@ xcrun altool --upload-app \
 **環境変数での管理（推奨）**:
 ```bash
 # .env ファイルに保存
-APP_STORE_CONNECT_API_KEY_KEY_ID=R2Q4FFAG8D
-APP_STORE_CONNECT_API_KEY_ISSUER_ID=3cc1c923-009c-4963-a9db-83d030e4c4e3
+APP_STORE_CONNECT_API_KEY_KEY_ID=YOUR_API_KEY_ID
+APP_STORE_CONNECT_API_KEY_ISSUER_ID=YOUR_ISSUER_ID
 APP_STORE_CONNECT_API_KEY_CONTENT="-----BEGIN PRIVATE KEY-----
 MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg...
 -----END PRIVATE KEY-----"
@@ -456,8 +456,8 @@ cd build/export
 xcrun altool --upload-app \
   --type ios \
   --file speedmeter.ipa \
-  --apiKey R2Q4FFAG8D \
-  --apiIssuer 3cc1c923-009c-4963-a9db-83d030e4c4e3
+  --apiKey YOUR_API_KEY_ID \
+  --apiIssuer YOUR_ISSUER_ID
 
 # 6. 審査申請
 cd ../..
