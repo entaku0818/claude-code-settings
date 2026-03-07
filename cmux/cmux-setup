@@ -18,7 +18,12 @@ if [ -z "$CURRENT" ]; then
     exit 1
 fi
 
+PROJECT_NAME=$(basename "$PROJECT_DIR")
 echo "レイアウトをセットアップ中..."
+
+# ワークスペースのタイトルをプロジェクト名に固定
+$CMUX send --surface "$CURRENT" "precmd() { printf '\\033]0;${PROJECT_NAME}\\007' }; preexec() { printf '\\033]0;${PROJECT_NAME}\\007' }; printf '\\033]0;${PROJECT_NAME}\\007'\n"
+sleep 0.2
 
 # 左にyaziペイン（new-splitの出力からサーフェスIDを直接取得）
 LEFT_RESULT=$($CMUX new-split left 2>&1)
@@ -43,3 +48,7 @@ else
 fi
 
 echo "✅ 右: ターミナル（作業用）"
+
+# 現在のペイン（右）でclaudeを起動
+$CMUX send --surface "$CURRENT" "cd ${PROJECT_DIR} && claude -c --dangerously-skip-permissions\n"
+echo "✅ 右: claude -c --dangerously-skip-permissions 起動"
