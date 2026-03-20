@@ -9,6 +9,14 @@ CMUX="/Applications/cmux.app/Contents/Resources/bin/cmux"
 
 PERSONAS=("pdm" "designer" "engineer" "marketer")
 NAMES=("PDM" "デザイナー" "エンジニア" "マーケター")
+CONTEXTS=(
+  "あなたはPDMです。プロダクトの優先順位・ロードマップ・ユーザー価値の観点で考えてください。"
+  "あなたはデザイナーです。UI/UX・ユーザー体験・ビジュアルの観点で考えてください。"
+  "あなたはエンジニアです。実装・技術的実現性・コード品質の観点で考えてください。"
+  "あなたはマーケターです。集客・ASO・収益化・ユーザー獲得の観点で考えてください。"
+)
+
+PROJECT_DIR="$(pwd)"
 
 # 新ワークスペース作成
 $CMUX new-workspace > /dev/null
@@ -17,7 +25,8 @@ WS=$($CMUX current-workspace)
 
 open_tab() {
   local NAME="$1"
-  local IS_FIRST="$2"
+  local CONTEXT="$2"
+  local IS_FIRST="$3"
 
   if [ "$IS_FIRST" != "true" ]; then
     $CMUX new-surface --workspace "$WS" > /dev/null
@@ -28,20 +37,23 @@ open_tab() {
   SURFACE=$($CMUX list-pane-surfaces --workspace "$WS" 2>/dev/null | grep '\[selected\]' | grep -o 'surface:[0-9A-Za-z-]*')
 
   $CMUX rename-tab --workspace "$WS" --surface "$SURFACE" "$NAME" > /dev/null
-  $CMUX send --workspace "$WS" --surface "$SURFACE" "claude"
+  $CMUX send --workspace "$WS" --surface "$SURFACE" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
+  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
+  sleep 2
+  $CMUX send --workspace "$WS" --surface "$SURFACE" "$CONTEXT"
   $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
 }
 
 if [[ "${1}" =~ ^(pdm|designer|engineer|marketer)$ ]]; then
   for i in "${!PERSONAS[@]}"; do
     if [ "${PERSONAS[$i]}" = "$1" ]; then
-      open_tab "${NAMES[$i]}" "true"
+      open_tab "${NAMES[$i]}" "${CONTEXTS[$i]}" "true"
       break
     fi
   done
 else
   for i in "${!PERSONAS[@]}"; do
     IS_FIRST=$( [ $i -eq 0 ] && echo "true" || echo "false" )
-    open_tab "${NAMES[$i]}" "$IS_FIRST"
+    open_tab "${NAMES[$i]}" "${CONTEXTS[$i]}" "$IS_FIRST"
   done
 fi
