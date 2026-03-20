@@ -8,7 +8,8 @@ cmux用のセットアップスクリプト集。
 cmux/
 ├── README.md       # このファイル
 ├── cmux-repos      # repository配下を全ワークスペースで開く
-└── cmux-setup      # ワークスペースのレイアウト自動セットアップ（yazi + lazygit）
+├── cmux-setup      # ワークスペースのレイアウト自動セットアップ（yazi + lazygit）
+└── persona         # 4人格（PDM・デザイナー・エンジニア・マーケター）を別タブで開く
 ```
 
 ## セットアップ
@@ -16,8 +17,8 @@ cmux/
 ### 1. スクリプトを ~/bin/ にコピー
 
 ```bash
-cp cmux-repos cmux-setup ~/bin/
-chmod +x ~/bin/cmux-repos ~/bin/cmux-setup
+cp cmux-repos cmux-setup persona ~/bin/
+chmod +x ~/bin/cmux-repos ~/bin/cmux-setup ~/bin/persona
 ```
 
 ### 2. ~/bin/ にPATHが通っているか確認
@@ -79,3 +80,16 @@ cmux-setup /path/to/project       # パス指定
 │         │   lazygit    │
 └─────────┴──────────────┘
 ```
+
+### 4人格セッションを開く
+
+```bash
+persona                              # 全人格を開く
+persona "タスク内容"                 # 全人格を開く（タスクあり）
+persona pdm "優先度を整理して"       # 1人格だけ開く
+persona designer "スクショ改善して"
+persona engineer "実装方針を相談"
+persona marketer "ASOを見直して"
+```
+
+人格定義は `/Users/entaku/repository/memo/personas/` に格納。
