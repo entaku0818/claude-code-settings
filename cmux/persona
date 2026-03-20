@@ -1,0 +1,98 @@
+#!/bin/bash
+# persona.sh - 4人格を1ワークスペース内の別タブで開く
+#
+# Usage:
+#   ./persona.sh                    # 全人格を開く（タスクなし）
+#   ./persona.sh "タスク内容"       # 全人格を開く（タスクあり）
+#   ./persona.sh pdm "タスク内容"   # 1人格だけ開く
+
+CMUX="/Applications/cmux.app/Contents/Resources/bin/cmux"
+PERSONA_DIR="/Users/entaku/repository/memo/personas"
+
+PERSONAS=("pdm" "designer" "engineer" "marketer")
+NAMES=("PDM" "デザイナー" "エンジニア" "マーケター")
+
+# 引数解析
+if [[ "${1}" =~ ^(pdm|designer|engineer|marketer)$ ]]; then
+  TARGET_PERSONA="$1"
+  TASK="${2:-}"
+else
+  TARGET_PERSONA="all"
+  TASK="${1:-}"
+fi
+
+# 新ワークスペース作成
+echo "ワークスペースを作成中..."
+$CMUX new-workspace > /dev/null
+sleep 1
+WS=$($CMUX current-workspace)
+echo "ワークスペース: $WS"
+
+open_persona() {
+  local PERSONA="$1"
+  local NAME="$2"
+  local IS_FIRST="$3"
+
+  # 最初以外は新タブ作成
+  if [ "$IS_FIRST" != "true" ]; then
+    $CMUX new-surface --workspace "$WS" > /dev/null
+    sleep 0.5
+  fi
+
+  # 現在選択中のサーフェスrefを取得
+  local SURFACE
+  SURFACE=$($CMUX list-pane-surfaces --workspace "$WS" 2>/dev/null | grep '\[selected\]' | grep -o 'surface:[0-9A-Za-z-]*')
+
+  # タブ名変更
+  if [ -n "$SURFACE" ]; then
+    $CMUX rename-tab --workspace "$WS" --surface "$SURFACE" "$NAME" > /dev/null
+  else
+    $CMUX rename-tab --workspace "$WS" "$NAME" > /dev/null
+  fi
+
+  # claudeを起動
+  $CMUX send --workspace "$WS" --surface "$SURFACE" "claude"
+  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
+  sleep 3
+
+  # 人格プロンプトを送信
+  local PERSONA_CONTENT
+  PERSONA_CONTENT=$(cat "$PERSONA_DIR/${PERSONA}.md")
+  local PROMPT
+  if [ -n "$TASK" ]; then
+    PROMPT="以下の人格として振る舞ってください。
+
+${PERSONA_CONTENT}
+
+---
+
+タスク: ${TASK}"
+  else
+    PROMPT="以下の人格として振る舞ってください。
+
+${PERSONA_CONTENT}"
+  fi
+
+  $CMUX send --workspace "$WS" --surface "$SURFACE" "$PROMPT"
+  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
+
+  echo "  [$NAME] 起動完了"
+}
+
+if [ "$TARGET_PERSONA" = "all" ]; then
+  for i in "${!PERSONAS[@]}"; do
+    IS_FIRST=$( [ $i -eq 0 ] && echo "true" || echo "false" )
+    open_persona "${PERSONAS[$i]}" "${NAMES[$i]}" "$IS_FIRST"
+    sleep 1
+  done
+  echo "完了！4人格のタブを開きました。"
+else
+  # 1人格だけ開く場合
+  for i in "${!PERSONAS[@]}"; do
+    if [ "${PERSONAS[$i]}" = "$TARGET_PERSONA" ]; then
+      open_persona "${PERSONAS[$i]}" "${NAMES[$i]}" "true"
+      echo "完了！"
+      break
+    fi
+  done
+fi
