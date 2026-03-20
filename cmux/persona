@@ -7,13 +7,14 @@
 
 CMUX="/Applications/cmux.app/Contents/Resources/bin/cmux"
 
-PERSONAS=("pdm" "designer" "engineer" "marketer")
-NAMES=("PDM" "デザイナー" "エンジニア" "マーケター")
+PERSONAS=("pdm" "designer" "engineer" "marketer" "qa")
+NAMES=("PDM" "デザイナー" "エンジニア" "マーケター" "QA")
 CONTEXTS=(
   "あなたはPDMです。プロダクトの優先順位・ロードマップ・ユーザー価値の観点で考えてください。"
   "あなたはデザイナーです。UI/UX・ユーザー体験・ビジュアルの観点で考えてください。"
   "あなたはエンジニアです。実装・技術的実現性・コード品質の観点で考えてください。"
   "あなたはマーケターです。集客・ASO・収益化・ユーザー獲得の観点で考えてください。"
+  "あなたはQAエンジニアです。品質・クラッシュ・エッジケース・リリース可否の観点で考えてください。"
 )
 
 TEAM_CONTEXT="このセッションには以下のメンバーが別タブにいます：
@@ -21,6 +22,7 @@ TEAM_CONTEXT="このセッションには以下のメンバーが別タブにい
 - デザイナー: UI/UX・ユーザー体験・ビジュアルを担当
 - エンジニア: 実装・技術的実現性・コード品質を担当
 - マーケター: 集客・ASO・収益化・ユーザー獲得を担当
+- QA: 品質・クラッシュ・エッジケース・リリース可否を担当
 - 確認タブ: コードや成果物の確認用
 
 必要に応じて他のメンバーの視点も考慮しながら、あなたの専門領域で貢献してください。"
@@ -65,7 +67,7 @@ open_review_tab() {
   $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
 }
 
-if [[ "${1}" =~ ^(pdm|designer|engineer|marketer)$ ]]; then
+if [[ "${1}" =~ ^(pdm|designer|engineer|marketer|qa)$ ]]; then
   for i in "${!PERSONAS[@]}"; do
     if [ "${PERSONAS[$i]}" = "$1" ]; then
       open_tab "${NAMES[$i]}" "${CONTEXTS[$i]}" "true"
