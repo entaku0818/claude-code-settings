@@ -16,6 +16,15 @@ CONTEXTS=(
   "あなたはマーケターです。集客・ASO・収益化・ユーザー獲得の観点で考えてください。"
 )
 
+TEAM_CONTEXT="このセッションには以下のメンバーが別タブにいます：
+- PDM: プロダクトの優先順位・ロードマップ・ユーザー価値を担当
+- デザイナー: UI/UX・ユーザー体験・ビジュアルを担当
+- エンジニア: 実装・技術的実現性・コード品質を担当
+- マーケター: 集客・ASO・収益化・ユーザー獲得を担当
+- 確認タブ: コードや成果物の確認用
+
+必要に応じて他のメンバーの視点も考慮しながら、あなたの専門領域で貢献してください。"
+
 PROJECT_DIR="$(pwd)"
 
 # 新ワークスペース作成
@@ -40,7 +49,9 @@ open_tab() {
   $CMUX send --workspace "$WS" --surface "$SURFACE" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
   $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
   sleep 2
-  $CMUX send --workspace "$WS" --surface "$SURFACE" "$CONTEXT"
+  $CMUX send --workspace "$WS" --surface "$SURFACE" "$CONTEXT
+
+$TEAM_CONTEXT"
   $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
 }
 
