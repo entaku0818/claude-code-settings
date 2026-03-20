@@ -44,6 +44,16 @@ open_tab() {
   $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
 }
 
+open_review_tab() {
+  $CMUX new-surface --workspace "$WS" > /dev/null
+  sleep 0.5
+  local SURFACE
+  SURFACE=$($CMUX list-pane-surfaces --workspace "$WS" 2>/dev/null | grep '\[selected\]' | grep -o 'surface:[0-9A-Za-z-]*')
+  $CMUX rename-tab --workspace "$WS" --surface "$SURFACE" "確認" > /dev/null
+  $CMUX send --workspace "$WS" --surface "$SURFACE" "cd \"$PROJECT_DIR\" && cmux-setup \"$PROJECT_DIR\""
+  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
+}
+
 if [[ "${1}" =~ ^(pdm|designer|engineer|marketer)$ ]]; then
   for i in "${!PERSONAS[@]}"; do
     if [ "${PERSONAS[$i]}" = "$1" ]; then
@@ -56,4 +66,5 @@ else
     IS_FIRST=$( [ $i -eq 0 ] && echo "true" || echo "false" )
     open_tab "${NAMES[$i]}" "${CONTEXTS[$i]}" "$IS_FIRST"
   done
+  open_review_tab
 fi
