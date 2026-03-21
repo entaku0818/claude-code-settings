@@ -1,9 +1,9 @@
 #!/bin/bash
-# persona - 各人格を別ワークスペースで開く
+# cmux-agile-team - アジャイルチームを別ワークスペースで開く
 #
 # Usage:
-#   persona          # PDM・デザイナー・エンジニア・マーケター・QAを別ワークスペースで開く
-#   persona pdm      # 1人格だけ開く
+#   cmux-agile-team          # PDM・デザイナー・エンジニア・マーケター・QAを別ワークスペースで開く
+#   cmux-agile-team pdm      # 1人格だけ開く
 
 CMUX="/Applications/cmux.app/Contents/Resources/bin/cmux"
 
