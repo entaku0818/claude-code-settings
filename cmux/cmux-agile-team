@@ -45,19 +45,27 @@ open_workspace() {
   local NAME="$1"
   local CONTEXT="$2"
 
-  $CMUX new-workspace > /dev/null
-  sleep 0.5
+  # new-workspace が "OK <UUID>" を返すのでUUIDを取得
   local WS
-  WS=$($CMUX current-workspace)
+  WS=$($CMUX new-workspace 2>&1 | awk '{print $2}')
+  sleep 1
 
   $CMUX rename-workspace --workspace "$WS" "$NAME" > /dev/null
+
+  # claudeを起動
   $CMUX send --workspace "$WS" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
   $CMUX send-key --workspace "$WS" "Enter"
-  sleep 2
-  $CMUX send --workspace "$WS" "$CONTEXT
 
-$TEAM_CONTEXT"
+  # claudeが起動するまで待つ
+  sleep 5
+
+  # コンテキストをtmpファイル経由で送信（特殊文字対策）
+  local TMPFILE
+  TMPFILE=$(mktemp)
+  printf '%s\n\n%s' "$CONTEXT" "$TEAM_CONTEXT" > "$TMPFILE"
+  $CMUX send --workspace "$WS" "$(cat "$TMPFILE")"
   $CMUX send-key --workspace "$WS" "Enter"
+  rm "$TMPFILE"
 }
 
 if [[ "${1}" =~ ^(pdm|designer|engineer|marketer|qa)$ ]]; then
