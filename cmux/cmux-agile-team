@@ -37,7 +37,13 @@ TEAM_CONTEXT="このセッションには以下のメンバーが別ワークス
 - 作業が完了したらそのタブは閉じてください（cmux close-surface）
 - メインのタブは常に会話用として残しておいてください
 - 作業タブを開いたら、タブが閉じられるまで定期的に進捗を確認してください（cmux read-screen で監視）
-- 完了・エラーを検知したらすぐにユーザーに結果を報告してください"
+- 完了・エラーを検知したらすぐにユーザーに結果を報告してください
+
+## Boardワークスペースの活用
+- 「${REPO_NAME} - Board」というワークスペースにgit履歴・フォルダ構成・状態監視が表示されています
+- 変更内容の確認・レビューが必要な時は必ずBoardを参照してください
+- 特にデザイナーはスクショ・UIファイルの変更確認に、QAはコード変更の確認にBoardを活用してください
+- cmux read-screen で「${REPO_NAME} - Board」の内容を確認することで最新の変更状況を把握できます"
 
 PROJECT_DIR="$(pwd)"
 REPO_NAME=$(basename "$PROJECT_DIR")
@@ -157,4 +163,6 @@ else
   for i in "${!PERSONAS[@]}"; do
     open_workspace "${NAMES[$i]}" "${CONTEXTS[$i]}"
   done
+  # Boardワークスペースを起動
+  cmux-board "$PROJECT_DIR"
 fi

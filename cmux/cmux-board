@@ -1,0 +1,49 @@
+#!/bin/zsh
+# cmux-board - git履歴・フォルダ・状態監視のボードワークスペースを作成
+#
+# Usage:
+#   cmux-board               # 現在のディレクトリでボードを開く
+#   cmux-board /path/to/dir  # パス指定
+
+CMUX=/Applications/cmux.app/Contents/Resources/bin/cmux
+PROJECT_DIR="${1:-$PWD}"
+REPO_NAME=$(basename "$PROJECT_DIR")
+
+if ! $CMUX ping > /dev/null 2>&1; then
+  echo "cmuxが起動していません。"
+  exit 1
+fi
+
+WINDOW=$($CMUX current-window)
+
+# 新ワークスペース作成
+WS=$($CMUX new-workspace 2>&1 | awk '{print $2}')
+sleep 0.5
+$CMUX move-workspace-to-window --workspace "$WS" --window "$WINDOW" > /dev/null
+$CMUX rename-workspace --workspace "$WS" "${REPO_NAME} - Board" > /dev/null
+
+# 現在のサーフェス（右・メイン）を取得
+MAIN=$($CMUX list-pane-surfaces --workspace "$WS" 2>/dev/null | grep '\[selected\]' | grep -o 'surface:[0-9A-Za-z-]*')
+
+# 左にyazi
+LEFT_RESULT=$($CMUX new-split left --workspace "$WS" --surface "$MAIN" 2>&1)
+LEFT=$( echo "$LEFT_RESULT" | awk '{print $2}')
+sleep 0.3
+$CMUX send --workspace "$WS" --surface "$LEFT" "cd ${PROJECT_DIR} && y"
+$CMUX send-key --workspace "$WS" --surface "$LEFT" "Enter"
+
+# 下にwatch git status
+BOTTOM_RESULT=$($CMUX new-split down --workspace "$WS" --surface "$MAIN" 2>&1)
+BOTTOM=$(echo "$BOTTOM_RESULT" | awk '{print $2}')
+sleep 0.3
+$CMUX send --workspace "$WS" --surface "$BOTTOM" "cd ${PROJECT_DIR} && watch -n 5 'git log --oneline -20 && echo \"---\" && git status'"
+$CMUX send-key --workspace "$WS" --surface "$BOTTOM" "Enter"
+
+# 右上（メイン）にlazygit
+$CMUX send --workspace "$WS" --surface "$MAIN" "cd ${PROJECT_DIR} && lazygit"
+$CMUX send-key --workspace "$WS" --surface "$MAIN" "Enter"
+
+echo "✅ ${REPO_NAME} - Board を作成しました"
+echo "  左: yazi（フォルダ）"
+echo "  右上: lazygit（git履歴）"
+echo "  右下: watch git status（状態監視）"
