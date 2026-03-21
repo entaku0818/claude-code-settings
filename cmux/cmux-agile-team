@@ -90,7 +90,53 @@ open_workspace() {
   rm "$TMPFILE"
 }
 
-if [[ "${1}" =~ ^(pdm|designer|engineer|marketer|qa)$ ]]; then
+stop_team() {
+  # PDMワークスペースを探す
+  local PDM_WS
+  PDM_WS=$($CMUX list-workspaces 2>/dev/null | grep "${REPO_NAME} - PDM" | grep -o '[0-9A-F-]\{36\}')
+
+  if [ -z "$PDM_WS" ]; then
+    echo "PDMワークスペースが見つかりません"
+    exit 1
+  fi
+
+  local LEARNINGS_DIR="/Users/entaku/repository/memo/personas/learnings/${REPO_NAME}"
+  local DATE
+  DATE=$(date +%Y-%m-%d)
+  local OUTFILE="${LEARNINGS_DIR}/${DATE}.md"
+
+  local STOP_PROMPT="チームの作業を終了します。以下の手順で振り返りを実施してください：
+
+1. 各メンバー（デザイナー・エンジニア・マーケター・QA）に以下を聞いてください：
+   - 今日やったこと
+   - うまくいったこと
+   - 課題・改善点
+   - 次回への知見
+
+2. 全員の回答を集約して、以下のファイルに書き込んでください：
+   ${OUTFILE}
+
+   フォーマット：
+   # 振り返り - ${REPO_NAME} - ${DATE}
+   ## PDM
+   ## デザイナー
+   ## エンジニア
+   ## マーケター
+   ## QA
+   ## 総括
+
+3. 書き込みが完了したら全メンバーのワークスペースを閉じてください"
+
+  mkdir -p "$LEARNINGS_DIR"
+
+  $CMUX send --workspace "$PDM_WS" "$STOP_PROMPT"
+  $CMUX send-key --workspace "$PDM_WS" "Enter"
+  echo "PDMに振り返り指示を送りました。完了後にワークスペースが閉じられます。"
+}
+
+if [ "${1}" = "stop" ]; then
+  stop_team
+elif [[ "${1}" =~ ^(pdm|designer|engineer|marketer|qa)$ ]]; then
   for i in "${!PERSONAS[@]}"; do
     if [ "${PERSONAS[$i]}" = "$1" ]; then
       open_workspace "${NAMES[$i]}" "${CONTEXTS[$i]}"
