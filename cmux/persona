@@ -1,8 +1,8 @@
 #!/bin/bash
-# persona - 4人格タブを1ワークスペースで開く
+# persona - 各人格を別ワークスペースで開く
 #
 # Usage:
-#   persona          # PDM・デザイナー・エンジニア・マーケターの4タブを開く
+#   persona          # PDM・デザイナー・エンジニア・マーケター・QAを別ワークスペースで開く
 #   persona pdm      # 1人格だけ開く
 
 CMUX="/Applications/cmux.app/Contents/Resources/bin/cmux"
@@ -17,13 +17,12 @@ CONTEXTS=(
   "あなたはQAエンジニアです。品質・クラッシュ・エッジケース・リリース可否の観点で考えてください。"
 )
 
-TEAM_CONTEXT="このセッションには以下のメンバーが別タブにいます：
+TEAM_CONTEXT="このセッションには以下のメンバーが別ワークスペースにいます：
 - PDM: プロダクトの優先順位・ロードマップ・ユーザー価値を担当
 - デザイナー: UI/UX・ユーザー体験・ビジュアルを担当
 - エンジニア: 実装・技術的実現性・コード品質を担当
 - マーケター: 集客・ASO・収益化・ユーザー獲得を担当
 - QA: 品質・クラッシュ・エッジケース・リリース可否を担当
-- 確認タブ: コードや成果物の確認用
 
 ## チームの動き方
 - 問題が発生したら他のメンバーに相談・協力を求めてください
@@ -34,55 +33,34 @@ TEAM_CONTEXT="このセッションには以下のメンバーが別タブにい
 
 PROJECT_DIR="$(pwd)"
 
-# 新ワークスペース作成
-$CMUX new-workspace > /dev/null
-sleep 1
-WS=$($CMUX current-workspace)
-
-open_tab() {
+open_workspace() {
   local NAME="$1"
   local CONTEXT="$2"
-  local IS_FIRST="$3"
 
-  if [ "$IS_FIRST" != "true" ]; then
-    $CMUX new-surface --workspace "$WS" > /dev/null
-    sleep 0.5
-  fi
+  $CMUX new-workspace > /dev/null
+  sleep 0.5
+  local WS
+  WS=$($CMUX current-workspace)
 
-  local SURFACE
-  SURFACE=$($CMUX list-pane-surfaces --workspace "$WS" 2>/dev/null | grep '\[selected\]' | grep -o 'surface:[0-9A-Za-z-]*')
-
-  $CMUX rename-tab --workspace "$WS" --surface "$SURFACE" "$NAME" > /dev/null
-  $CMUX send --workspace "$WS" --surface "$SURFACE" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
-  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
+  $CMUX rename-workspace --workspace "$WS" "$NAME" > /dev/null
+  $CMUX send --workspace "$WS" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
+  $CMUX send-key --workspace "$WS" "Enter"
   sleep 2
-  $CMUX send --workspace "$WS" --surface "$SURFACE" "$CONTEXT
+  $CMUX send --workspace "$WS" "$CONTEXT
 
 $TEAM_CONTEXT"
-  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
-}
-
-open_review_tab() {
-  $CMUX new-surface --workspace "$WS" > /dev/null
-  sleep 0.5
-  local SURFACE
-  SURFACE=$($CMUX list-pane-surfaces --workspace "$WS" 2>/dev/null | grep '\[selected\]' | grep -o 'surface:[0-9A-Za-z-]*')
-  $CMUX rename-tab --workspace "$WS" --surface "$SURFACE" "確認" > /dev/null
-  $CMUX send --workspace "$WS" --surface "$SURFACE" "cd \"$PROJECT_DIR\" && cmux-setup \"$PROJECT_DIR\""
-  $CMUX send-key --workspace "$WS" --surface "$SURFACE" "Enter"
+  $CMUX send-key --workspace "$WS" "Enter"
 }
 
 if [[ "${1}" =~ ^(pdm|designer|engineer|marketer|qa)$ ]]; then
   for i in "${!PERSONAS[@]}"; do
     if [ "${PERSONAS[$i]}" = "$1" ]; then
-      open_tab "${NAMES[$i]}" "${CONTEXTS[$i]}" "true"
+      open_workspace "${NAMES[$i]}" "${CONTEXTS[$i]}"
       break
     fi
   done
 else
   for i in "${!PERSONAS[@]}"; do
-    IS_FIRST=$( [ $i -eq 0 ] && echo "true" || echo "false" )
-    open_tab "${NAMES[$i]}" "${CONTEXTS[$i]}" "$IS_FIRST"
+    open_workspace "${NAMES[$i]}" "${CONTEXTS[$i]}"
   done
-  open_review_tab
 fi
