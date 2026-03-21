@@ -52,6 +52,7 @@ TEAM_CONTEXT="このセッションには以下のメンバーが別ワークス
 - 完了・エラーを検知したらすぐにユーザーに結果を報告してください"
 
 PROJECT_DIR="$(pwd)"
+REPO_NAME=$(basename "$PROJECT_DIR")
 WINDOW=$($CMUX current-window)
 
 open_workspace() {
@@ -66,7 +67,7 @@ open_workspace() {
   $CMUX move-workspace-to-window --workspace "$WS" --window "$WINDOW" > /dev/null
   sleep 1
 
-  $CMUX rename-workspace --workspace "$WS" "$NAME" > /dev/null
+  $CMUX rename-workspace --workspace "$WS" "${NAME} - ${REPO_NAME}" > /dev/null
 
   # claudeを起動
   $CMUX send --workspace "$WS" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
