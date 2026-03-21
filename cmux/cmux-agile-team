@@ -40,6 +40,7 @@ TEAM_CONTEXT="このセッションには以下のメンバーが別ワークス
 - 完了・エラーを検知したらすぐにユーザーに結果を報告してください"
 
 PROJECT_DIR="$(pwd)"
+WINDOW=$($CMUX current-window)
 
 open_workspace() {
   local NAME="$1"
@@ -48,6 +49,9 @@ open_workspace() {
   # new-workspace が "OK <UUID>" を返すのでUUIDを取得
   local WS
   WS=$($CMUX new-workspace 2>&1 | awk '{print $2}')
+
+  # 現在のウィンドウに移動
+  $CMUX move-workspace-to-window --workspace "$WS" --window "$WINDOW" > /dev/null
   sleep 1
 
   $CMUX rename-workspace --workspace "$WS" "$NAME" > /dev/null
