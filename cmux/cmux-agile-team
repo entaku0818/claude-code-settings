@@ -80,7 +80,13 @@ open_workspace() {
   # PDMには監視・指示の送り方を別メッセージで送る
   if [ "$NAME" = "PDM" ]; then
     sleep 3
-    $CMUX send --workspace "$WS" "/loop 1m cmux list-workspaces でメンバー一覧を確認し、各ワークスペースを cmux read-screen で確認して詰まり・エラーがあれば報告。メンバーへの指示はcmux sendで送りcmux send-keyでEnterを押した後read-screenで認識確認すること。"
+    $CMUX send --workspace "$WS" "チーム監視を開始してください。以下のルールで監視してください：
+
+- cmux list-workspaces でメンバー一覧を確認し、各ワークスペースを cmux read-screen で状態確認する
+- 全員スタンバイ中が続いた場合は監視間隔を段階的に延ばす（1分→3分→5分→10分）
+- 誰かが作業中・エラー状態になったら即座に1分間隔に戻す
+- 詰まり・エラーがあればすぐユーザーに報告する
+- メンバーへの指示はcmux sendで送りcmux send-keyでEnterを押した後read-screenで認識確認すること"
     $CMUX send-key --workspace "$WS" "Enter"
   fi
 }
