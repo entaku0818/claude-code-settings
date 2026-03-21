@@ -67,7 +67,7 @@ open_workspace() {
   $CMUX move-workspace-to-window --workspace "$WS" --window "$WINDOW" > /dev/null
   sleep 1
 
-  $CMUX rename-workspace --workspace "$WS" "${NAME} - ${REPO_NAME}" > /dev/null
+  $CMUX rename-workspace --workspace "$WS" "${REPO_NAME} - ${NAME}" > /dev/null
 
   # claudeを起動
   $CMUX send --workspace "$WS" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
