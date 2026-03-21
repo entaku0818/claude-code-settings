@@ -60,8 +60,13 @@ open_workspace() {
   $CMUX send --workspace "$WS" "cd \"$PROJECT_DIR\" && claude --dangerously-skip-permissions"
   $CMUX send-key --workspace "$WS" "Enter"
 
-  # claudeが起動するまで待つ
-  sleep 5
+  # claudeが起動するまで待つ（最大15秒）
+  for _ in $(seq 1 15); do
+    sleep 1
+    if $CMUX read-screen --workspace "$WS" 2>/dev/null | grep -q "Claude Code"; then
+      break
+    fi
+  done
 
   # コンテキストをtmpファイル経由で送信（特殊文字対策）
   local TMPFILE
