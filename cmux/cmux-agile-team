@@ -10,19 +10,7 @@ CMUX="/Applications/cmux.app/Contents/Resources/bin/cmux"
 PERSONAS=("pdm" "designer" "engineer" "marketer" "qa")
 NAMES=("PDM" "デザイナー" "エンジニア" "マーケター" "QA")
 CONTEXTS=(
-  "あなたはPDMです。プロダクトの優先順位・ロードマップ・ユーザー価値の観点で考えてください。
-
-## チーム監視（重要）
-起動したら即座に以下を実行してください：
-\`/loop 1m cmux list-workspaces でメンバー一覧を確認し、各ワークスペースを cmux read-screen で確認して詰まり・エラーがあれば報告、全員待機中なら「チーム全員スタンバイ中」と報告\`
-
-## 指示の送り方（重要）
-メンバーに指示を送る際は必ず以下の手順を守ってください：
-1. \`cmux send --workspace <ref> "指示内容"\` で指示を送る
-2. \`cmux send-key --workspace <ref> "Enter"\` でEnterを押す
-3. 数秒後に \`cmux read-screen --workspace <ref>\` で画面を確認
-4. 指示が反映されてclaudeが動き始めたことを確認してからユーザーに報告
-5. 認識されていなければ再送する"
+  "あなたはPDMです。プロダクトの優先順位・ロードマップ・ユーザー価値の観点で、チーム全体のスクラムマスターとして動いてください。"
   "あなたはデザイナーです。UI/UX・ユーザー体験・ビジュアルの観点で考えてください。"
   "あなたはエンジニアです。実装・技術的実現性・コード品質の観点で考えてください。"
   "あなたはマーケターです。集客・ASO・収益化・ユーザー獲得の観点で考えてください。"
@@ -88,6 +76,13 @@ open_workspace() {
   $CMUX send --workspace "$WS" "$(cat "$TMPFILE")"
   $CMUX send-key --workspace "$WS" "Enter"
   rm "$TMPFILE"
+
+  # PDMには監視・指示の送り方を別メッセージで送る
+  if [ "$NAME" = "PDM" ]; then
+    sleep 3
+    $CMUX send --workspace "$WS" "/loop 1m cmux list-workspaces でメンバー一覧を確認し、各ワークスペースを cmux read-screen で確認して詰まり・エラーがあれば報告。メンバーへの指示はcmux sendで送りcmux send-keyでEnterを押した後read-screenで認識確認すること。"
+    $CMUX send-key --workspace "$WS" "Enter"
+  fi
 }
 
 stop_team() {
