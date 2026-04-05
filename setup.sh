@@ -17,4 +17,13 @@ link() {
 # yazi
 link "$CONFIG_DIR/yazi/yazi.toml" "$HOME/.config/yazi/yazi.toml"
 
+# Claude Code skills
+SKILLS_DIR="$CONFIG_DIR/skills"
+if [ -d "$SKILLS_DIR" ]; then
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        skill_name=$(basename "$skill_dir")
+        link "$skill_dir" "$HOME/.claude/skills/$skill_name"
+    done
+fi
+
 echo "完了！"
